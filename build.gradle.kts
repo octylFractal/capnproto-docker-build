@@ -2,6 +2,7 @@ import de.marcphilipp.gradle.nexus.NexusPublishExtension
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import kotlin.streams.asSequence
 
@@ -11,7 +12,7 @@ plugins {
 }
 
 val nameRegex = Regex("capnproto-c\\+\\+-(.+?)\\.tar\\.gz")
-val capnProtoTarGzMatch = Files.list(project.projectDir.toPath()).use { files ->
+val capnProtoTarGzMatch = Files.list(Paths.get("/")).use { files ->
     files.asSequence()
         .map { p -> p.fileName.toString() }
         .mapNotNull { nameRegex.matchEntire(it) }
@@ -19,8 +20,8 @@ val capnProtoTarGzMatch = Files.list(project.projectDir.toPath()).use { files ->
 }
 
 val njobs = Runtime.getRuntime().availableProcessors()
-val capnProtoDir = project.projectDir.resolve("capnproto-c++-${capnProtoTarGzMatch?.groupValues?.get(1)}")
-val capnProtoJavaDir = project.projectDir.resolve("capnproto-java-master")
+val capnProtoDir = File("/capnproto-c++-${capnProtoTarGzMatch?.groupValues?.get(1)}")
+val capnProtoJavaDir = File("/capnproto-java-master")
 
 val taskGroup = "Cap'n Proto"
 
