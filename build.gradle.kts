@@ -1,13 +1,11 @@
-import de.marcphilipp.gradle.nexus.NexusPublishExtension
-import java.io.ByteArrayOutputStream
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import kotlin.streams.asSequence
 
 plugins {
-    id("de.marcphilipp.nexus-publish") version "0.4.0"
+    id("com.jfrog.bintray") version "1.8.0"
+    `maven-publish`
     signing
 }
 
@@ -17,6 +15,10 @@ val capnProtoTarGzMatch = Files.list(Paths.get("/")).use { files ->
         .map { p -> p.fileName.toString() }
         .mapNotNull { nameRegex.matchEntire(it) }
         .singleOrNull()
+}
+
+capnProtoTarGzMatch?.let {
+    version = capnProtoTarGzMatch.groupValues[1]
 }
 
 val njobs = Runtime.getRuntime().availableProcessors()
@@ -126,6 +128,22 @@ val capnProtoJavaJar = tasks.register<Jar>("capnProtoJavaJar") {
     archiveClassifier.set("linux")
 }
 
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
+    setPublications("capnproto", "capnproto-java")
+    with(pkg) {
+        repo = "maven"
+        name = "unofficial-capn-proto-executables"
+        userOrg = "octylfractal"
+        setLicenses("MIT")
+        vcsUrl = "https://github.com/octylFractal/capnproto-docker-build.git"
+        with(version) {
+            name = project.version.toString()
+        }
+    }
+}
+
 publishing {
     publications {
         register<MavenPublication>("capnproto") {
@@ -134,10 +152,8 @@ publishing {
             }
             groupId = "net.octyl.capnproto"
             artifactId = "capnproto-exec"
+            version = project.version.toString()
 
-            capnProtoTarGzMatch?.let {
-                version = capnProtoTarGzMatch.groupValues[1]
-            }
             artifact(capnProtoJar.get())
         }
         register<MavenPublication>("capnproto-java") {
@@ -162,29 +178,3 @@ project.configure<SigningExtension> {
             .publications.getByName("capnproto-java"))
     }
 }
-
-project.configure<NexusPublishExtension> {
-    repositories {
-        create("nexus") {
-            nexusUrl.set(uri("https://oss.sonatype.org/service/local/"))
-            username.set(project.provider {
-                val usernameOptions = listOf(
-                    project.findProperty("ossrhUsername") as? String
-                )
-                usernameOptions
-                    .filterNot { it.isNullOrBlank() }
-                    .firstOrNull()
-            })
-            password.set(project.provider {
-                val passwordOptions = listOf(
-                    project.findProperty("ossrhPassword") as? String,
-                    System.getenv("OSSRH_PASSWORD")
-                )
-                passwordOptions
-                    .filterNot { it.isNullOrBlank() }
-                    .firstOrNull()
-            })
-        }
-    }
-}
-
