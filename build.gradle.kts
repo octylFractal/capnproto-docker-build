@@ -4,7 +4,7 @@ import java.nio.file.StandardCopyOption
 import kotlin.streams.asSequence
 
 plugins {
-    id("com.jfrog.bintray") version "1.8.0"
+    id("com.jfrog.bintray") version "1.8.4"
     `maven-publish`
     signing
 }
