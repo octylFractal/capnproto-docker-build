@@ -1,3 +1,4 @@
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -23,7 +24,7 @@ capnProtoTarGzMatch?.let {
 
 val njobs = Runtime.getRuntime().availableProcessors()
 val capnProtoDir = File("/capnproto-c++-${capnProtoTarGzMatch?.groupValues?.get(1)}")
-val capnProtoJavaDir = File("/capnproto-java-master")
+val capnProtoJavaDir = File("/capnproto-java")
 
 val taskGroup = "Cap'n Proto"
 
@@ -163,7 +164,14 @@ publishing {
             groupId = "net.octyl.capnproto"
             artifactId = "capnproto-java-exec"
 
-            version = "0.1.5-SNAPSHOT"
+            val cap = java.io.ByteArrayOutputStream()
+            execIn(capnProtoJavaDir) {
+                commandLine("git", "rev-parse", "--short", "--verify", "HEAD")
+                standardOutput = cap
+            }
+            val gitId = cap.toString(StandardCharsets.UTF_8)
+
+            version = "0.1.5-$gitId"
             artifact(capnProtoJavaJar.get())
         }
     }
