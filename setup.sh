@@ -9,4 +9,4 @@ wget https://capnproto.org/capnproto-c++-"$version".tar.gz
 tar zxf capnproto-c++-"$version".tar.gz
 
 ### get capnproto-java
-git clone https://github.com/octylFractal/capnproto-java
+git clone https://github.com/capnproto/capnproto-java
