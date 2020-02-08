@@ -133,8 +133,8 @@ bintray {
     key = System.getenv("BINTRAY_KEY")
     setPublications("capnproto", "capnproto-java")
     with(pkg) {
-        repo = "maven"
-        name = "unofficial-capn-proto-executables"
+        repo = "unofficial-capn-proto-executables"
+        name = "capnproto-executables"
         userOrg = "octylfractal"
         setLicenses("MIT")
         vcsUrl = "https://github.com/octylFractal/capnproto-docker-build.git"
