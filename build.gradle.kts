@@ -169,7 +169,7 @@ publishing {
                 commandLine("git", "rev-parse", "--short", "--verify", "HEAD")
                 standardOutput = cap
             }
-            val gitId = cap.toString(StandardCharsets.UTF_8)
+            val gitId = cap.toString(StandardCharsets.UTF_8).trim()
 
             version = "0.1.5-$gitId"
             artifact(capnProtoJavaJar.get())
