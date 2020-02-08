@@ -38,7 +38,7 @@ val installCapnProto = tasks.register("installCapnProto") {
 
     doLast {
         execIn(capnProtoDir) {
-            commandLine("./configure")
+            commandLine(capnProtoDir.resolve("./configure").absolutePath)
         }
         execIn(capnProtoDir) {
             commandLine("make", "clean")
@@ -65,7 +65,9 @@ val buildCapnProto = tasks.register("buildCapnProto") {
     doLast {
         Files.createDirectories(outputDirectory.toPath())
         execIn(capnProtoDir) {
-            commandLine("./configure", "--with-external-capnp", "--prefix=$outputDirectory")
+            commandLine(capnProtoDir.resolve("./configure").absolutePath,
+                "--with-external-capnp",
+                "--prefix=${outputDirectory.absolutePath}")
         }
         execIn(capnProtoDir) {
             commandLine("make", "clean")
