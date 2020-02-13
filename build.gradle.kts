@@ -1,7 +1,6 @@
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import kotlin.streams.asSequence
 
 plugins {
@@ -105,11 +104,14 @@ val buildCapnProtoJava = tasks.register("buildCapnProtoJava") {
         execIn(capnProtoJavaDir) {
             commandLine("make", "-j$njobs")
         }
-        Files.move(
-            capnProtoJavaDir.resolve("capnpc-java").toPath(),
-            outputDirectory.resolve("capnpc-java").toPath(),
-            StandardCopyOption.REPLACE_EXISTING
-        )
+        copy {
+            from(capnProtoJavaDir.resolve("capnpc-java"))
+            into(outputDirectory.resolve("bin"))
+        }
+        copy {
+            from(capnProtoJavaDir.resolve("compiler/src/main/schema"))
+            into(outputDirectory.resolve("include"))
+        }
     }
 }
 
