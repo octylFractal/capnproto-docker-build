@@ -18,11 +18,11 @@ val capnProtoTarGzMatch = Files.list(Paths.get("/")).use { files ->
         .singleOrNull()
 }
 
+var buildStr = "build." + (project.findProperty("build.number") ?: "dev")
+
 capnProtoTarGzMatch?.let {
     version = "${capnProtoTarGzMatch.groupValues[1]}+$buildStr"
 }
-
-var buildStr = "build." + (project.findProperty("build.number") ?: "dev")
 val njobs = Runtime.getRuntime().availableProcessors()
 val capnProtoDir = File("/capnproto-c++-${capnProtoTarGzMatch?.groupValues?.get(1)}")
 val capnProtoJavaDir = File("/capnproto-java")
