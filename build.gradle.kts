@@ -19,9 +19,10 @@ val capnProtoTarGzMatch = Files.list(Paths.get("/")).use { files ->
 }
 
 capnProtoTarGzMatch?.let {
-    version = capnProtoTarGzMatch.groupValues[1]
+    version = "${capnProtoTarGzMatch.groupValues[1]}+$buildStr"
 }
 
+var buildStr = "build." + (project.findProperty("build.number") ?: "dev")
 val njobs = Runtime.getRuntime().availableProcessors()
 val capnProtoDir = File("/capnproto-c++-${capnProtoTarGzMatch?.groupValues?.get(1)}")
 val capnProtoJavaDir = File("/capnproto-java")
@@ -32,6 +33,7 @@ inline fun Project.execIn(
     workingDir: File,
     crossinline block: ExecSpec.() -> Unit
 ) = exec {
+    require(Files.exists(workingDir.toPath())) { "No such directory: $workingDir" }
     this.workingDir = workingDir
     block()
 }
@@ -117,7 +119,7 @@ val capnProtoJar = tasks.register<Jar>("capnProtoJar") {
     from(buildCapnProto)
 
     archiveBaseName.set("capnproto-exec")
-    archiveClassifier.set("linux")
+    archiveClassifier.set("linux-x86_64")
 }
 
 val capnProtoJavaJar = tasks.register<Jar>("capnProtoJavaJar") {
@@ -126,7 +128,7 @@ val capnProtoJavaJar = tasks.register<Jar>("capnProtoJavaJar") {
     from(buildCapnProtoJava)
 
     archiveBaseName.set("capnproto-java-exec")
-    archiveClassifier.set("linux")
+    archiveClassifier.set("linux-x86_64")
 }
 
 bintray {
@@ -165,13 +167,15 @@ publishing {
             artifactId = "capnproto-java-exec"
 
             val cap = java.io.ByteArrayOutputStream()
-            execIn(capnProtoJavaDir) {
-                commandLine("git", "rev-parse", "--short", "--verify", "HEAD")
-                standardOutput = cap
+            if (Files.exists(capnProtoJavaDir.toPath())) {
+                execIn(capnProtoJavaDir) {
+                    commandLine("git", "rev-parse", "--short", "--verify", "HEAD")
+                    standardOutput = cap
+                }
             }
-            val gitId = cap.toString(StandardCharsets.UTF_8).trim()
+            val gitId = cap.toString(StandardCharsets.UTF_8).trim().ifBlank { "dev" }
 
-            version = "0.1.5-$gitId"
+            version = "0.1.5-$gitId+$buildStr"
             artifact(capnProtoJavaJar.get())
         }
     }
